@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Armónico y Modal - PanchorotH Style</title>
+    <style>
+        :root {
+            --bg-color: #080c14;
+            --panel-bg: #111827;
+            --accent-gold: #f59e0b;
+            --accent-purple: #9333ea;
+            --accent-purple-glow: rgba(147, 51, 234, 0.4);
+            --accent-blue: #0ea5e9;    /* Dedo 1 */
+            --accent-green: #22c55e;   /* Dedo 2 */
+            --accent-yellow: #eab308;  /* Dedo 3 */
+            --accent-orange: #f97316;  /* Dedo 4 */
+            --accent-red: #ef4444;     /* Alta Disonancia */
+            --accent-green-ok: #10b981;/* Consonante */
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #1f293d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            max-width: 1450px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: var(--accent-gold);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.05rem;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        select, button, input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, button:hover, input[type="text"]:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: #000;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .btn-primary:hover {
+            background: #d97706;
+        }
+
+        .btn-secondary {
+            background: rgba(147, 51, 234, 0.15);
+            border: 1px solid var(--accent-purple);
+            color: var(--text-main);
+            margin-top: 5px;
+        }
+        .btn-secondary:hover {
+            background: var(--accent-purple);
+        }
+
+        /* Botonera Rápida */
+        .chord-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .palette-btn {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1 1 calc(25% - 6px);
+            text-align: center;
+        }
+
+        .palette-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+            border-color: var(--accent-gold);
+        }
+
+        /* Contenedor de Tarjetas de Acordes / Secuencia */
+        .sequence-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chord-card {
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .chord-card.consonant { border-left: 6px solid var(--accent-green-ok); }
+        .chord-card.tense { border-left: 6px solid var(--accent-purple); }
+        .chord-card.dissonant { border-left: 6px solid var(--accent-red); }
+
+        .tension-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .badge-consonant { background: rgba(16, 185, 129, 0.2); color: var(--accent-green-ok); border: 1px solid var(--accent-green-ok); }
+        .badge-tense { background: rgba(147, 51, 234, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple); }
+        .badge-dissonant { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        .chord-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .chord-header h3 {
+            color: var(--text-main);
+            font-size: 1.15rem;
+        }
+
+        /* Diapasón Interactivo Desplazable */
+        .fretboard-wrapper {
+            overflow-x: auto;
+            margin-top: 10px;
+            padding-bottom: 5px;
+        }
+
+        .fretboard {
+            display: grid;
+            background: #05080e;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            min-width: 750px;
+        }
+
+        .fret-row {
+            display: contents;
+        }
+
+        .fret-cell {
+            border-right: 1px solid #1f293d;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .fret-cell:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .fret-cell.nut {
+            border-right: 3px solid var(--accent-gold);
+            background: rgba(245, 158, 11, 0.03);
+        }
+
+        .string-label {
+            background: #030508;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            border-right: 2px solid var(--border-color);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cuerda activa en Morado */
+        .fret-cell.active-string::after {
+            content: '';
+            position: absolute;
+            height: 3px;
+            background: var(--accent-purple);
+            box-shadow: 0 0 8px var(--accent-purple-glow);
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Marcadores de notas y colores por dedo */
+        .note-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 0.55rem;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .note-marker.root { border: 2px solid var(--accent-gold); }
+        
+        /* Colores Anatómicos de Dedos */
+        .finger-1 { background: var(--accent-blue); color: #000; }     /* Dedo 1: Azul Cielo */
+        .finger-2 { background: var(--accent-green); color: #000; }    /* Dedo 2: Verde Lima */
+        .finger-3 { background: var(--accent-yellow); color: #000; }   /* Dedo 3: Amarillo */
+        .finger-4 { background: var(--accent-orange); color: #fff; }   /* Dedo 4: Naranja/Rojo */
+
+        .finger-tag {
+            font-size: 0.4rem;
+            line-height: 1;
+        }
+
+        .fret-numbers {
+            display: grid;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .nav-trastes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        .nav-trastes button {
+            width: auto;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+        }
+
+        .analysis-box {
+            background: var(--bg-color);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Laboratorio Armónico y Modal (PanchorotH Edition)</h1>
+        <p>Diapasón interactivo deslizable, colores anatómicos para dedos (1-4), cuerdas activas en morado y análisis en tiempo real</p>
+    </header>
+
+    <div class="main-grid">
+        <!-- Panel Izquierdo: Controles -->
+        <div class="panel">
+            <h2>1. Configuración del Entorno</h2>
+            
+            <div class="control-group">
+                <label for="tuningSelect">Afinación de la Guitarra:</label>
+                <select id="tuningSelect">
+                    <option value="standard">Estándar 6 Cuerdas (E-A-D-G-B-e)</option>
+                    <option value="dropD">Drop D (D-A-D-G-B-e)</option>
+                    <option value="dropC">Drop C (C-G-C-F-A-d)</option>
+                    <option value="dropB">Drop B (B-F#-B-E-G#-c#)</option>
+                    <option value="tuningB">Afinación en B (B-E-A-D-F#-B)</option>
+                    <option value="tuningC">Afinación en C (C-F-Bb-Eb-G-C)</option>
+                    <option value="tuningCsharp">Afinación en C# (C#-F#-B-E-G#-C#)</option>
+                    <option value="tuningD">Afinación en D (D-G-C-F-A-D)</option>
+                    <option value="dropA7" selected>Drop A - 7 Cuerdas (A-D-G-C-F-A-D)</option>
+                </select>
+            </div>
+
+            <h2>2. Botonera de Acordes Rápidos</h2>
+            <div class="chord-palette">
+                <button class="palette-btn" onclick="loadPreset('C')">C</button>
+                <button class="palette-btn" onclick="loadPreset('Am')">Am</button>
+                <button class="palette-btn" onclick="loadPreset('Fmaj7')">Fmaj7</button>
+                <button class="palette-btn" onclick="loadPreset('G')">G</button>
+                <button class="palette-btn" onclick="loadPreset('A#')">A#</button>
+                <button class="palette-btn" onclick="loadPreset('Dm')">Dm</button>
+                <button class="palette-btn" onclick="loadPreset('E7')">E7</button>
+                <button class="palette-btn" onclick="loadPreset('Bdim')">Bdim</button>
+            </div>
+
+            <h2 style="margin-top: 15px;">3. Modo Interactivo (Guitarra ⇄ Teoría)</h2>
+            <div class="analysis-box">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">Haz clic directamente en las casillas del diapasón de la derecha para formar un acorde y analizarlo:</p>
+                <div id="liveAnalysis" style="font-size: 0.85rem; font-weight: bold; color: var(--accent-gold);">Ninguna nota seleccionada (Haz clic en el mástil)</div>
+            </div>
+            <button class="btn-secondary" onclick="clearCustomSelection()">Limpiar Selección del Diapasón</button>
+        </div>
+
+        <!-- Panel Derecho: Diapasones y Análisis por Acorde -->
+        <div>
+            <div class="panel">
+                <h2>Visualizador en el Diapasón</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+                    <span style="color:var(--accent-blue)">■ D1 (Azul)</span> | 
+                    <span style="color:var(--accent-green)">■ D2 (Verde)</span> | 
+                    <span style="color:var(--accent-yellow)">■ D3 (Amarillo)</span> | 
+                    <span style="color:var(--accent-orange)">■ D4 (Naranja)</span> | 
+                    <span style="color:var(--accent-purple)">■ Cuerdas activas (Morado)</span>
+                </p>
+
+                <!-- Controles de Desplazamiento de Trastes -->
+                <div class="nav-trastes">
+                    <button class="btn-secondary" onclick="shiftFretting(-3)">◄ Mover Trastes</button>
+                    <span id="fretRangeLabel" style="font-weight: bold; color: var(--accent-gold);">Trastes: 0 al 12</span>
+                    <button class="btn-secondary" onclick="shiftFretting(3)">Mover Trastes ►</button>
+                </div>
+
+                <div class="sequence-container" id="sequenceContainer" style="margin-top: 15px;">
+                    <!-- Renderizado dinámico -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const notesAll = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        const tunings = {
+            standard: { name: 'Estándar', strings: [4, 11, 7, 2, 9, 4] },
+            dropD: { name: 'Drop D', strings: [4, 11, 7, 2, 9, 2] },
+            dropC: { name: 'Drop C', strings: [2, 9, 5, 0, 7, 0] },
+            dropB: { name: 'Drop B', strings: [1, 8, 4, 11, 6, 11] },
+            tuningB: { name: 'Afinación B', strings: [11, 6, 9, 2, 11, 11] },
+            tuningC: { name: 'Afinación C', strings: [0, 7, 10, 3, 7, 0] },
+            tuningCsharp: { name: 'Afinación C#', strings: [1, 8, 11, 4, 8, 1] },
+            tuningD: { name: 'Afinación D', strings: [2, 9, 0, 5, 9, 2] },
+            dropA7: { name: 'Drop A (7 Cuerdas)', strings: [2, 9, 5, 0, 7, 2, 9] }
+        };
+
+        // Base de datos de posturas con posiciones en todo el mástil y colores de dedos (1 a 4)
+        const chordDatabase = {
+            'C': { name: 'C (Do Mayor)', root: 'C', type: 'consonant', desc: 'Estable y abierta', positions: [{string:5,fret:3,finger:3,note:'C'}, {string:4,fret:2,finger:2,note:'E'}, {string:3,fret:0,finger:0,note:'G'}, {string:2,fret:1,finger:1,note:'C'}, {string:1,fret:0,finger:0,note:'E'}]},
+            'AM': { name: 'Am (La Menor)', root: 'A', type: 'consonant', desc: 'Melancólico y reposado', positions: [{string:5,fret:0,finger:0,note:'A'}, {string:4,fret:2,finger:2,note:'E'}, {string:3,fret:2,finger:3,note:'A'}, {string:2,fret:1,finger:1,note:'C'}, {string:1,fret:0,finger:0,note:'E'}]},
+            'FMAJ7': { name: 'Fmaj7 (Fa con 7ma M)', root: 'F', type: 'consonant', desc: 'Etéreo y modal (Lidio)', positions: [{string:4,fret:3,finger:3,note:'F'}, {string:3,fret:2,finger:2,note:'A'}, {string:2,fret:1,finger:1,note:'C'}, {string:1,fret:0,finger:0,note:'E'}]},
+            'G': { name: 'G (Sol Mayor)', root: 'G', type: 'consonant', desc: 'Punto de apoyo dominante', positions: [{string:6,fret:3,finger:2,note:'G'}, {string:5,fret:2,finger:1,note:'B'}, {string:4,fret:0,finger:0,note:'D'}, {string:3,fret:0,finger:0,note:'G'}, {string:2,fret:0,finger:0,note:'B'}, {string:1,fret:3,finger:4,note:'G'}]},
+            'A#': { name: 'A# / Bb (Sib Mayor)', root: 'A#', type: 'tense', desc: 'Color modal abierto', positions: [{string:5,fret:1,finger:1,note:'A#'}, {string:4,fret:3,finger:3,note:'F'}, {string:3,fret:3,finger:4,note:'A#'}, {string:2,fret:3,finger:2,note:'D'}, {string:1,fret:1,finger:1,note:'F'}]},
+            'DM': { name: 'Dm (Re Menor)', root: 'D', type: 'consonant', desc: 'Introspectivo y clásico', positions: [{string:4,fret:0,finger:0,note:'D'}, {string:3,fret:2,finger:2,note:'A'}, {string:2,fret:3,finger:3,note:'F'}, {string:1,fret:1,finger:1,note:'D'}]},
+            'E7': { name: 'E7 (Mi 7ma)', root: 'E', type: 'tense', desc: 'Alta tensión armónica', positions: [{string:6,fret:0,finger:0,note:'E'}, {string:5,fret:2,finger:2,note:'B'}, {string:4,fret:0,finger:0,note:'D'}, {string:3,fret:1,finger:1,note:'G#'}, {string:2,fret:0,finger:0,note:'B'}, {string:1,fret:0,finger:0,note:'E'}]},
+            'BDIM': { name: 'Bdim (Si Disminuido)', root: 'B', type: 'dissonant', desc: 'Inestable, oscuro y penetrante', positions: [{string:4,fret:1,finger:1,note:'B'}, {string:3,fret:4,finger:4,note:'F'}, {string:2,fret:3,finger:3,note:'G#'}, {string:1,fret:1,finger:1,note:'D'}]}
+        };
+
+        let currentChordKey = 'C';
+        let fretStart = 0; // Ventana de trastes inicial (0 al 12)
+        let customSelectedNotes = []; // Para el modo interactivo inverso (clic en diapasón)
+
+        function loadPreset(chordName) {
+            currentChordKey = chordName;
+            customSelectedNotes = [];
+            renderApp();
+        }
+
+        function shiftFretting(delta) {
+            fretStart = Math.max(0, Math.min(12, fretStart + delta));
+            renderApp();
+        }
+
+        function clearCustomSelection() {
+            customSelectedNotes = [];
+            document.getElementById('liveAnalysis').innerText = 'Ninguna nota seleccionada (Haz clic en el mástil)';
+            renderApp();
+        }
+
+        function handleCellClick(stringNum, fretNum, noteName) {
+            // Modo interactivo inverso: Agregar o quitar nota al hacer clic
+            const existingIndex = customSelectedNotes.findIndex(p => p.string === stringNum && p.fret === fretNum);
+            if (existingIndex >= 0) {
+                customSelectedNotes.splice(existingIndex, 1);
+            } else {
+                // Asignar automáticamente un dedo cíclico (1 a 4) para prueba visual
+                const assignedFinger = (customSelectedNotes.length % 4) + 1;
+                customSelectedNotes.push({ string: stringNum, fret: fretNum, finger: assignedFinger, note: noteName });
+            }
+            updateLiveAnalysis();
+            renderApp();
+        }
+
+        function updateLiveAnalysis() {
+            if (customSelectedNotes.length === 0) {
+                document.getElementById('liveAnalysis').innerText = 'Ninguna nota seleccionada (Haz clic en el mástil)';
+                return;
+            }
+            const notes = customSelectedNotes.map(p => p.note);
+            document.getElementById('liveAnalysis').innerText = `Notas pulsadas: [${notes.join(', ')}] -> Analizando tensión y estructura...`;
+        }
+
+        function renderApp() {
+            const tuningKey = document.getElementById('tuningSelect').value;
+            const container = document.getElementById('sequenceContainer');
+            container.innerHTML = '';
+
+            document.getElementById('fretRangeLabel.innerText') = `Trastes: ${fretStart} al ${fretStart + 12}`;
+
+            // Determinar si mostramos acorde preestablecido o selección personalizada en vivo
+            let activeData;
+            if (customSelectedNotes.length > 0) {
+                activeData = {
+                    name: 'Acorde Personalizado (Custom)',
+                    root: customSelectedNotes[0].note,
+                    type: customSelectedNotes.length >= 3 ? 'tense' : 'dissonant',
+                    desc: 'Formado directamente en el diapasón',
+                    positions: customSelectedNotes
+                };
+            } else {
+                activeData = chordDatabase[currentChordKey] || chordDatabase['C'];
+            }
+
+            let badgeClass = 'badge-consonant';
+            let badgeText = 'Consonante / Estable';
+            if (activeData.type === 'tense') {
+                badgeClass = 'badge-tense';
+                badgeText = 'Tensión / Modal';
+            } else if (activeData.type === 'dissonant') {
+                badgeClass = 'badge-dissonant';
+                badgeText = 'Alta Disonancia';
+            }
+
+            const card = document.createElement('div');
+            card.className = `chord-card ${activeData.type}`;
+            card.innerHTML = `
+                <div class="chord-header">
+                    <h3>${activeData.name}</h3>
+                    <span class="tension-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="chord-desc">${activeData.desc}</div>
+                <div class="fretboard-wrapper">
+                    <div class="fretboard" id="mainFretboard"></div>
+                </div>
+            `;
+            container.appendChild(card);
+
+            drawFretboard('mainFretboard', activeData, tuningKey);
+        }
+
+        function drawFretboard(elementId, chordInfo, tuningKey) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+
+            const currentTuning = tunings[tuningKey];
+            const numStrings = currentTuning.strings.length;
+            const stringNames = numStrings === 7 ? ['d', 'A', 'F', 'C', 'G', 'D', 'A'] : ['e', 'B', 'G', 'D', 'A', 'E'];
+            const maxFretsToShow = 12;
+
+            // Configurar columnas de la cuadrícula: 1 para etiqueta de cuerda + 13 para los trastes de la ventana
+            container.style.gridTemplateColumns = `40px repeat(${maxFretsToShow + 1}, 1fr)`;
+
+            // Cabecera de números de trastes
+            const headerRow = document.createElement('div');
+            headerRow.style.display = 'contents';
+            let emptyLabel = document.createElement('div');
+            emptyLabel.className = 'string-label';
+            emptyLabel.innerText = '#';
+            headerRow.appendChild(emptyLabel);
+
+            for (let f = fretStart; f <= fretStart + maxFretsToShow; f++) {
+                let fDiv = document.createElement('div');
+                fDiv.style.fontSize = '0.65rem';
+                fDiv.style.textAlign = 'center';
+                fDiv.style.color = 'var(--text-muted)';
+                fDiv.style.padding = '4px 0';
+                fDiv.innerText = f === 0 ? 'AI' : f;
+                headerRow.appendChild(fDiv);
+            }
+            container.appendChild(headerRow);
+
+            // Dibujar cuerdas (de la más aguda a la más grave)
+            stringNames.forEach((strName, sIdx) => {
+                const realStringNum = numStrings - sIdx;
+                const openNoteIndex = currentTuning.strings[sIdx];
+
+                const label = document.createElement('div');
+                label.className = 'string-label';
+                label.innerText = strName;
+                container.appendChild(label);
+
+                for (let f = 0; f <= maxFretsToShow; f++) {
+                    const absoluteFret = fretStart + f;
+                    const cell = document.createElement('div');
+                    
+                    const currentNoteIndex = (openNoteIndex + absoluteFret) % 12;
+                    const currentNoteName = notesAll[currentNoteIndex];
+
+                    // Buscar si esta posición forma parte del acorde
+                    const foundPos = chordInfo.positions.find(p => p.string === realStringNum && p.fret === absoluteFret);
+
+                    // Si hay nota en este traste, la celda se marca con cuerda activa en morado
+                    if (foundPos) {
+                        cell.className = `fret-cell active-string ${absoluteFret === 0 ? 'nut' : ''}`;
+                    } else {
+                        cell.className = `fret-cell ${absoluteFret === 0 ? 'nut' : ''}`;
+                    }
+
+                    // Evento para el modo interactivo (clic en el diapasón)
+                    cell.onclick = () => handleCellClick(realStringNum, absoluteFret, currentNoteName);
+
+                    if (foundPos) {
+                        const marker = document.createElement('div');
+                        const isRoot = foundPos.note === chordInfo.root;
+                        
+                        // Asignar color según los dedos (1 a 4)
+                        let fingerClass = `finger-${foundPos.finger || 1}`;
+                        if (isRoot) marker.classList.add('root');
+
+                        marker.className = `note-marker ${fingerClass} ${isRoot ? 'root' : ''}`;
+                        marker.innerHTML = `<span>${foundPos.note}</span><span class="finger-tag">d${foundPos.finger || 1}</span>`;
+                        cell.appendChild(marker);
+                    }
+
+                    container.appendChild(cell);
+                }
+            });
+        }
+
+        // Eventos iniciales
+        document.getElementById('tuningSelect').onchange = renderApp;
+
+        // Renderizado inicial al cargar la página
+        renderApp();
+    </script>
+</body>
+</html>
